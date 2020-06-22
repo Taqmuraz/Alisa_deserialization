@@ -1,0 +1,7 @@
+F:\VisualStudioProjects\Alisa_Deserialization\bin\Debug\Alisa_Deserialization.exe.config
+F:\VisualStudioProjects\Alisa_Deserialization\bin\Debug\Alisa_Deserialization.exe
+F:\VisualStudioProjects\Alisa_Deserialization\bin\Debug\Alisa_Deserialization.pdb
+F:\VisualStudioProjects\Alisa_Deserialization\obj\Debug\Alisa_Deserialization.csprojAssemblyReference.cache
+F:\VisualStudioProjects\Alisa_Deserialization\obj\Debug\Alisa_Deserialization.csproj.CoreCompileInputs.cache
+F:\VisualStudioProjects\Alisa_Deserialization\obj\Debug\Alisa_Deserialization.exe
+F:\VisualStudioProjects\Alisa_Deserialization\obj\Debug\Alisa_Deserialization.pdb
