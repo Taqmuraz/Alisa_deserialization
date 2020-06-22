@@ -2,12 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Globalization;
-using System.Xml.XPath;
-using System.Runtime.CompilerServices;
-using System.Reflection;
-using System.Security.Cryptography;
 
 namespace Alisa_Deserialization
 {
@@ -46,7 +41,8 @@ namespace Alisa_Deserialization
 
 			string IStructValue.ToString (ref int space)
 			{
-				return $"{new string (' ', space)}{type} {value}\n";
+				string s = new string (' ', space);
+				return $"{s}{type} {value}\n";
 			}
 		}
 
@@ -60,16 +56,6 @@ namespace Alisa_Deserialization
 
 			public string name { get; private set; }
 			public string[] types { get; private set; }
-
-			public override string ToString ()
-			{
-				string result = $"struct {name}\n";
-				for (int i = 0; i < types.Length; i++)
-				{
-					result += $" {types[i]}\n";
-				}
-				return result;
-			}
 		}
 		class Struct : StructDescription, IStructValue
 		{
@@ -88,8 +74,11 @@ namespace Alisa_Deserialization
 
 			public string ToString (ref int space)
 			{
+				string s = string.Empty;
+				s = new string(' ', space);
+
 				string result = string.Empty;
-				string spacing = new string (' ', space);
+				string spacing = s;
 
 				result += $"{spacing}{name}\n";
 
@@ -97,7 +86,7 @@ namespace Alisa_Deserialization
 
 				for (int i = 0; i < values.Length; i++)
 				{
-					result += spacing + values[i].ToString (ref space);
+					result += values[i].ToString (ref space);
 				}
 
 				space--;
@@ -118,12 +107,13 @@ namespace Alisa_Deserialization
 			{
 				int start = position;
 				position += 8;
-				return int.Parse (binary.Substring (start, 8), NumberStyles.HexNumber).ToString ();
+				return uint.Parse (binary.Substring (start, 8), NumberStyles.HexNumber).ToString ();
 			}
 
 			public string WriteType (string value)
 			{
-				int i = int.Parse (value);
+				Console.WriteLine ($"Parse value : {value}");
+				uint i = uint.Parse (value);
 				return i.ToString("X8");
 			}
 		}
@@ -203,8 +193,18 @@ namespace Alisa_Deserialization
 		{
 			public string WriteBinary (Struct str)
 			{
-				List<string> structTypes = new List<string> ();
-				return WriteBinary (str, structTypes);
+				List<string> structTypes = new List<string> (str.values.Where(v => v is Struct).Select(v => (v as Struct).name));
+
+				string result = string.Empty;
+
+				foreach (var v in str.values)
+				{
+					if (v is Struct s)
+					{
+						result += WriteBinary (s, structTypes);
+					}
+				}
+				return result;
 			}
 
 			private string WriteBinary (Struct str, List<string> structTypes)
@@ -222,7 +222,7 @@ namespace Alisa_Deserialization
 					}
 					else
 					{
-						result += binaryTypes["int"].WriteType (structTypes.IndexOf(type).ToString());
+						result += binaryTypes["int"].WriteType (structTypes.IndexOf (type).ToString ());
 						result += WriteBinary ((Struct)str.values[i], structTypes);
 					}
 				}
@@ -244,11 +244,10 @@ namespace Alisa_Deserialization
 			List<string> types = new List<string> ();
 			StructDescription[] structs = new StructDescription[structuresCount];
 			int currentStruct = 0;
-			string binary_global = string.Empty;
 
 			for (int i = 0; i < structuresLines; i++)
 			{
-				string[] words = Console.ReadLine ().Split ();
+				string[] words = Console.ReadLine ().Split ().Where(w => !string.IsNullOrEmpty(w)).ToArray();
 				if (words[0].Equals ("struct"))
 				{
 					if (name != null)
@@ -257,9 +256,6 @@ namespace Alisa_Deserialization
 						currentStruct++;
 						types.Clear ();
 					}
-
-					string addIndex = binaryTypes["int"].WriteType ((currentStruct + 1).ToString ());
-					binary_global += addIndex;
 
 					name = words[1];
 				}
@@ -279,7 +275,7 @@ namespace Alisa_Deserialization
 
 			foreach (var s in read.values) output += s.ToString ();
 
-			Console.WriteLine (output);
+			Console.WriteLine (output.TrimEnd('\n', ' '));
 		}
 	}
 }
